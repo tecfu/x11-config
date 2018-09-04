@@ -1,0 +1,5 @@
+ctrl+j
+  ~/dotfiles/x/remap_keypresses.sh j
+
+ctrl+k
+  ~/dotfiles/x/remap_keypresses.sh k
