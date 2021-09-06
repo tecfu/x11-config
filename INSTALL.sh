@@ -11,6 +11,20 @@
 #
 ###
 
+### Check for xmodmap
+if ! [ -x "$(which xmodmap)" ]; then
+  echo "
+  ERROR! This package depends on \"xmodmap\". 
+  It must be installed in order to remap keys on startup."
+
+  exit
+fi
+
+xmodmap -e "remove Lock = Caps_Lock"
+xmodmap -e "keycode 9 = Caps_Lock NoSymbol Caps_Lock"
+xmodmap -e "keycode 66 = Escape NoSymbol Escape"
+xmodmap -pke > ~/.xmodmap
+
 ### Check for sxhkd
 if ! [ -x "$(which sxhkd)" ]; then
   echo "
