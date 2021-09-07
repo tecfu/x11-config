@@ -20,11 +20,6 @@ if ! [ -x "$(which xmodmap)" ]; then
   exit
 fi
 
-xmodmap -e "remove Lock = Caps_Lock"
-xmodmap -e "keycode 9 = Caps_Lock NoSymbol Caps_Lock"
-xmodmap -e "keycode 66 = Escape NoSymbol Escape"
-xmodmap -pke > ~/.xmodmap
-
 ### Check for sxhkd
 if ! [ -x "$(which sxhkd)" ]; then
   echo "
@@ -47,8 +42,9 @@ fi
 
 # declare array
 SYMLINKS=()
-SYMLINKS+=("$HOME/dotfiles/x/.Xmodmap $HOME/.Xmodmap")
-SYMLINKS+=("$HOME/dotfiles/x/sxhkdrc $HOME/sxhkdrc")
+SYMLINKS+=("$HOME/dotfiles/x11-config/.xinitrc $HOME/.xinitrc")
+SYMLINKS+=("$HOME/dotfiles/x11-config/.Xmodmap $HOME/.Xmodmap")
+SYMLINKS+=("$HOME/dotfiles/x11-config/sxhkdrc $HOME/sxhkdrc")
 #printf '%s\n' "${SYMLINKS[@]}"
 #
 for i in "${SYMLINKS[@]}"; do
