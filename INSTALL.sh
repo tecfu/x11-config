@@ -11,6 +11,11 @@
 #
 ###
 
+if which Xorg &> /dev/null; then
+  echo "INFO: X Window System not installed, skipping related config (keymappings)
+  exit 0
+fi
+
 ### Check for xmodmap
 if ! [ -x "$(which xmodmap)" ]; then
   echo "
