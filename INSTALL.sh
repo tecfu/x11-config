@@ -1,10 +1,5 @@
 #!/bin/bash
 
-PRODUCT="X11 CONFIG"
-
-OPENING_MESSAGE="STARTING $PRODUCT CONFIGURATION INSTALL"
-echo -e "\033[0;32m$OPENING_MESSAGE\033[0m"
-
 ###
 #   RUN THIS WITH /bin/bash NOT /bin/sh
 #   /bin/sh MAPS TO INCOMPATIBLE TERM EMULATORS 
@@ -19,30 +14,30 @@ echo -e "\033[0;32m$OPENING_MESSAGE\033[0m"
 ### Check for xmodmap
 if ! [ -x "$(which xmodmap)" ]; then
   echo "
-  ERROR! This package depends on \"xmodmap\". 
+  ERROR: This package depends on \"xmodmap\". 
   It must be installed in order to remap keys on startup."
 
-  exit
+  exit 1
 fi
 
 ### Check for sxhkd
 if ! [ -x "$(which sxhkd)" ]; then
   echo "
-  ERROR! This package depends on \"sxhkd\" (Simple X Hotkey Daemon). 
+  ERROR: This package depends on \"sxhkd\" (Simple X Hotkey Daemon). 
   To install it on Ubuntu use: 
 
   apt install sxhkd"
-  exit
+  exit 1
 fi
 
 ### Check for xdotool
 if ! [ -x "$(which xdotool)" ]; then
   echo "
-  ERROR! This package depends on \"xdotool\". 
+  ERROR: This package depends on \"xdotool\". 
   To install it on Ubuntu use:
 
   apt install xdotool"
-  exit
+  exit 1
 fi
 
 # declare array
@@ -60,16 +55,14 @@ for i in "${SYMLINKS[@]}"; do
   # ${OUT[1]} is path config file should be at
   #no config, create symlink to one
   if [ ! -f "${OUT[1]}" ] && [ ! -L "${OUT[1]}" ]; then
-    echo "Creating $i"
+    echo "SYMLINK: $i"
     ln -s $i 
   
   #config exsts; save if doesn't point to correct target
   elif [ "$(readlink -- "${OUT[1]}")" != "${OUT[0]}" ]; then
-    echo "MOVING ${OUT[1]} to ${OUT[1]}.saved"
+    echo "MOVING: git@github.com:tecfu/x11-config.git ${OUT[1]} to ${OUT[1]}.saved"
     mv "${OUT[1]}" "${OUT[1]}.saved"
     ln -s $i
   fi
 done
 
-CLOSING_MESSAGE="ENDING $PRODUCT CONFIGURATION INSTALL"
-echo -e "\033[0;32m$CLOSING_MESSAGE\033[0m"
