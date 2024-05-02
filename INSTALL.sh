@@ -70,4 +70,3 @@ for i in "${SYMLINKS[@]}"; do
     ln -s $i
   fi
 done
-
