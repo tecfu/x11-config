@@ -11,8 +11,8 @@
 #
 ###
 
-if which Xorg &> /dev/null; then
-  echo "INFO: X Window System not installed, skipping related config (keymappings)
+if ! [ -x "$(which Xorg)" ]; then
+  echo "INFO: X Window System not installed, skipping related config (keymappings)"
   exit 0
 fi
 
