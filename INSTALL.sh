@@ -1,5 +1,10 @@
 #!/bin/bash
 
+PRODUCT="X11 CONFIG"
+
+OPENING_MESSAGE="STARTING $PRODUCT CONFIGURATION INSTALL"
+echo -e "\033[0;32m$OPENING_MESSAGE\033[0m"
+
 ###
 #   RUN THIS WITH /bin/bash NOT /bin/sh
 #   /bin/sh MAPS TO INCOMPATIBLE TERM EMULATORS 
@@ -45,6 +50,7 @@ SYMLINKS=()
 SYMLINKS+=("$HOME/dotfiles/x11-config/.xinitrc $HOME/.xinitrc")
 SYMLINKS+=("$HOME/dotfiles/x11-config/.Xmodmap $HOME/.Xmodmap")
 SYMLINKS+=("$HOME/dotfiles/x11-config/sxhkdrc $HOME/sxhkdrc")
+
 #printf '%s\n' "${SYMLINKS[@]}"
 #
 for i in "${SYMLINKS[@]}"; do
@@ -65,5 +71,5 @@ for i in "${SYMLINKS[@]}"; do
   fi
 done
 
-printf "\n"
-echo DONE
+CLOSING_MESSAGE="ENDING $PRODUCT CONFIGURATION INSTALL"
+echo -e "\033[0;32m$CLOSING_MESSAGE\033[0m"
