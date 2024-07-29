@@ -48,7 +48,7 @@ fi
 # declare array
 SYMLINKS=()
 SYMLINKS+=("$HOME/dotfiles/x11-config/.xinitrc $HOME/.xinitrc")
-SYMLINKS+=("$HOME/dotfiles/x11-config/.Xmodmap $HOME/.Xmodmap")
+SYMLINKS+=("$HOME/dotfiles/x11-config/.xmodmap $HOME/.xmodmap")
 SYMLINKS+=("$HOME/dotfiles/x11-config/sxhkdrc $HOME/sxhkdrc")
 
 #printf '%s\n' "${SYMLINKS[@]}"
