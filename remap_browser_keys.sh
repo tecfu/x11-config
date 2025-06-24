@@ -5,7 +5,7 @@ W=`xdotool getactivewindow`
 S0=`xprop -id ${W} |awk '/WM_CLASS/{print $4}'`
 
 # Check if active window parent has "chrome" in name
-echo "$S0" | grep -ic 'chrome'
+echo "$S0" | grep -Eic 'chrome|chromium|firefox'
 if [ $? -eq 0 ];then
   S1=1
 else
@@ -23,7 +23,7 @@ case "$1" in
       xdotool getwindowfocus key --window %@ ctrl+j
     fi
     ;;
-  "k")_
+  "k")
     #if C-k was passed as an argument AND 
     #the focused window is chrome browser, press C-m
     #otherwise do nothing
@@ -37,6 +37,6 @@ case "$1" in
   *)
     #if some other argument, write to keypress.error.log
     Time=$(date +%T%s%n)
-    echo "$Time: Argument $1 not recognized by remap_keypresses.sh" >> remap_keypresses.error.log.txt
+    echo "$Time: Argument $1 not recognized by remap_browser_keys.sh" >> /tmp/remap_browser_keys.error.log.txt
     ;;
 esac

@@ -1,0 +1,39 @@
+modmap:
+  - name: "Swap CapsLock and Escape"
+    remap:
+      CapsLock: Esc
+      Esc: CapsLock
+
+keymap:
+  # Web browser specific mappings
+  #- name: "Chromium Browser Mapping"
+  #  application:
+  #    only: "Chromium-browser"
+  #  remap:
+  #    "C-Alt-j": "C-Alt-j"
+  #    "C-j": [PageDown,PageDown]
+  #    "C-k": [PageUp, PageUp]
+  
+  # Aider specific mappings
+  - name: "Aider Mapping"
+    application:
+      # Get with
+      # xprop | grep WM_CLASS
+      # *NOTE* Must spawn a new window in order to change the window class
+      # i.e. `alacritty --class Aider,Aider -e aider "$@"`
+      # *NOTE* .inputrc is ignored in Aider, which uses prompt_toolkit
+      only: "Aider"
+    remap:
+      # Defect: Output with synthetic modifiers break for all apps that read raw keyboard input
+      # So we need to make all our vim mode mappings resolve to an unmodified key
+      # https://github.com/xremap/xremap/discussions/669
+      #KEY_SPACE:
+      #  remap:
+      #    KEY_A: KEY_0
+      #    KEY_SEMICOLON: [SHIFT-KEY_4]
+      #  timeout_millis: 100
+      KEY_SPACE:
+        remap:
+          KEY_A: Home
+          KEY_SEMICOLON: End
+        timeout_millis: 100

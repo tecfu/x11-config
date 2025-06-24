@@ -16,12 +16,17 @@ if ! [ -x "$(which Xorg)" ]; then
   exit 0
 fi
 
-### Check for xmodmap
-if ! [ -x "$(which xmodmap)" ]; then
+### Check for xremap
+if ! [ -x "$(which xremap)" ]; then
   echo "
-  ERROR: This package depends on \"xmodmap\". 
-  It must be installed in order to remap keys on startup."
+  ERROR: This package depends on \"xremap\". 
+  It must be installed in order to remap keys on startup.
+  To install and set it up on Ubuntu use: 
 
+  sudo gpasswd -a $USER input
+  echo 'KERNEL=="uinput", GROUP="input", TAG+="uaccess"' | sudo tee /etc/udev/rules.d/input.rules
+  & cargo install xremap --features x11
+  "
   exit 1
 fi
 
@@ -47,9 +52,9 @@ fi
 
 # declare array
 SYMLINKS=()
-SYMLINKS+=("$HOME/dotfiles/x11-config/.xinitrc $HOME/.xinitrc")
-SYMLINKS+=("$HOME/dotfiles/x11-config/.xmodmap $HOME/.xmodmap")
-SYMLINKS+=("$HOME/dotfiles/x11-config/sxhkdrc $HOME/sxhkdrc")
+SYMLINKS+=("$HOME/dotfiles/x11-config/.xprofile $HOME/.xprofile")
+SYMLINKS+=("$HOME/dotfiles/x11-config/xremap.yml $HOME/.config/xremap/xremap.yml")
+SYMLINKS+=("$HOME/dotfiles/x11-config/sxhkdrc $HOME/.config/sxhkd/sxhkdrc")
 
 #printf '%s\n' "${SYMLINKS[@]}"
 #
@@ -60,12 +65,14 @@ for i in "${SYMLINKS[@]}"; do
   # ${OUT[1]} is path config file should be at
   #no config, create symlink to one
   if [ ! -f "${OUT[1]}" ] && [ ! -L "${OUT[1]}" ]; then
+    mkdir -p "$(dirname "${OUT[1]}")"
     echo "SYMLINK: $i"
     ln -s $i 
   
   #config exsts; save if doesn't point to correct target
   elif [ "$(readlink -- "${OUT[1]}")" != "${OUT[0]}" ]; then
     echo "MOVING: git@github.com:tecfu/x11-config.git ${OUT[1]} to ${OUT[1]}.saved"
+    mkdir -p "$(dirname "${OUT[1]}")"
     mv "${OUT[1]}" "${OUT[1]}.saved"
     ln -s $i
   fi

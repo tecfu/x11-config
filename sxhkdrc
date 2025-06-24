@@ -1,5 +1,5 @@
 ctrl+j
-  ~/dotfiles/x/remap_keypresses.sh j
+  ~/dotfiles/x11-config/remap_browser_keys.sh j
 
 ctrl+k
-  ~/dotfiles/x/remap_keypresses.sh k
+  ~/dotfiles/x11-config/remap_browser_keys.sh k

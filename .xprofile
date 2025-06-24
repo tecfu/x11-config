@@ -1,0 +1,76 @@
+#!/bin/sh
+
+# Log files
+XPROFILE_DEBUG_LOG="$HOME/xprofile_debug.log"
+XREMAP_RUN_LOG="$HOME/xremap_run.log"
+
+# Function to log messages with a timestamp to xprofile_debug.log
+log_debug() {
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - $1" >> "$XPROFILE_DEBUG_LOG"
+}
+
+# --- Script Start ---
+log_debug "-----------------------------------------------------"
+log_debug ".xprofile started."
+
+# Verify xremap binary and config file exist and are accessible
+XREMAP_BIN="$HOME/.cargo/bin/xremap"
+XREMAP_CONFIG="$HOME/dotfiles/x11-config/xremap.yml"
+
+if [ ! -x "$XREMAP_BIN" ]; then
+    log_debug "ERROR: xremap binary not found or not executable: $XREMAP_BIN"
+else
+    log_debug "xremap binary found: $XREMAP_BIN"
+fi
+
+if [ ! -f "$XREMAP_CONFIG" ]; then
+    log_debug "ERROR: xremap config file not found: $XREMAP_CONFIG"
+else
+    log_debug "xremap config file found: $XREMAP_CONFIG"
+fi
+
+# Check if 'ts' command is available
+if ! command -v ts >/dev/null 2>&1; then
+    log_debug "WARNING: 'ts' command (from moreutils) not found. xremap output will not be timestamped line-by-line."
+    # Fallback to direct logging without per-line timestamping for xremap
+    nohup $XREMAP_BIN --watch $XREMAP_CONFIG >> "$XREMAP_RUN_LOG" 2>&1 &
+else
+    log_debug "Attempting to start xremap with: $XREMAP_BIN --watch $XREMAP_CONFIG"
+    log_debug "Output will be in $XREMAP_RUN_LOG (timestamped by ts)"
+    # Launch xremap, pipe its stdout/stderr through ts for timestamping,
+    # redirect to its own log file, and background the whole pipeline.
+    nohup sh -c "$XREMAP_BIN --watch $XREMAP_CONFIG 2>&1 | ts '[%Y-%m-%d %H:%M:%S] -'" >> "$XREMAP_RUN_LOG" &
+fi
+XREMAP_PIPELINE_PID=$!
+
+log_debug "xremap pipeline launched with PID $XREMAP_PIPELINE_PID."
+
+sleep 3
+
+# Check if the shell running the pipeline is active.
+if ps -p $XREMAP_PIPELINE_PID > /dev/null; then
+    log_debug "xremap pipeline (PID $XREMAP_PIPELINE_PID) appears to be running."
+    XREMAP_ACTUAL_PID=$(pgrep -f "$XREMAP_BIN --watch $XREMAP_CONFIG")
+    if [ -n "$XREMAP_ACTUAL_PID" ]; then
+         log_debug "Actual xremap process found with PID(s): $XREMAP_ACTUAL_PID"
+    else
+         log_debug "WARNING: xremap pipeline shell is running, but couldn't find xremap process itself directly. Check $XREMAP_RUN_LOG."
+    fi
+else
+    log_debug "ERROR: xremap pipeline (PID $XREMAP_PIPELINE_PID) IS NOT RUNNING. Check $XREMAP_RUN_LOG."
+    log_debug "Contents of $XREMAP_RUN_LOG (last 20 lines if it exists):"
+    if [ -f "$XREMAP_RUN_LOG" ]; then
+        tail -n 20 "$XREMAP_RUN_LOG" | while IFS= read -r line; do log_debug "  LOG: $line"; done
+    else
+        log_debug "  $XREMAP_RUN_LOG does not exist."
+    fi
+fi
+
+log_debug ".xprofile finished."
+log_debug "-----------------------------------------------------"
+
+# Start sxhkd in background
+# sxhkd &
+
+# Start xmodmap in background
+# xmodmap $HOME/dotfiles/x11-config/xmodmap
