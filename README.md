@@ -22,7 +22,7 @@ Note: We have multiple system-level remapping application configurations saved o
 - Process started in .xprofile
 - Has a watch feature to automatically load mappings for new devices
 - Maps Caps Lock to Esc
-- ~~Maps C-j to C-b and C-k to C-m in Google Chrome~~
+- Maps C-j to C-b and C-k to C-m in Google Chrome
 - Maps Aider vim mode begin/end line to `<space>a`, `<space>;`
 
 ### Xmodmap / .xmodmap

@@ -6,13 +6,13 @@ modmap:
 
 keymap:
   # Web browser specific mappings
-  #- name: "Chromium Browser Mapping"
-  #  application:
-  #    only: "Chromium-browser"
-  #  remap:
-  #    "C-Alt-j": "C-Alt-j"
-  #    "C-j": [PageDown,PageDown]
-  #    "C-k": [PageUp, PageUp]
+  - name: "Chromium Browser Mapping"
+    application:
+      only: "Chromium-browser"
+    remap:
+      "C-Alt-j": "C-Alt-j"
+      "C-j": [PageDown,PageDown]
+      "C-k": [PageUp, PageUp]
   
   # Aider specific mappings
   - name: "Aider Mapping"
