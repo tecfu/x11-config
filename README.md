@@ -8,7 +8,8 @@ This repo contains configuration files for X11 desktops, specifically Xubuntu
 
 ## X11 configuration files
 
-Note: We have multiple system-level remapping application configurations saved options. Only one of them should be used at a time:
+*Note*: Multiple system-level remapping app configurations are stored here. 
+Only one of them should be used at a time:
 
 - Xremap (system + application level mappings)
 - xmodmap (system level mappings)
@@ -27,11 +28,15 @@ Note: We have multiple system-level remapping application configurations saved o
 
 ### Xmodmap / .xmodmap
 
+**DISABLED** Commented code retained for reference
+
 - Process started in .xprofile
 - No watch feature
 - Maps Caps Lock to Esc
 
 ### Simple X Hotkey Daemon / skhdrc
+
+**DISABLED** Commented code retained for reference
 
 - Process started in .xprofile
 - No watch feature

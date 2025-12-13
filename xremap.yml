@@ -5,7 +5,7 @@ modmap:
       Esc: CapsLock
 
 keymap:
-  # Web browser specific mappings
+  # Maps Aider page up/down to Ctrl-j/k
   - name: "Chromium Browser Mapping"
     application:
       only: "Chromium-browser"
