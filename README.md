@@ -51,6 +51,10 @@ Only one of them should be used at a time:
   - [xdotool](https://github.com/jordansissel/xdotool)
   - [sxhkd](https://github.com/baskerville/sxhkd)
 
+  Run `INSTALL.sh` to verify dependencies and automatically configure necessary permissions (udev rules, user groups) for xremap.
+
+  **Important:** You must log out and log back in (or reboot) after running the script for the group permission changes to take effect.
+
 ### See Also
 
 https://vi.stackexchange.com/a/39913/5223

@@ -16,16 +16,37 @@ if ! [ -x "$(which Xorg)" ]; then
   exit 0
 fi
 
-### Check for xremap
+### check for xremap & configure permissions
+  
+echo "INFO: configuring udev rules for xremap..."
+
+# Create input group if it doesn't exist
+if ! getent group input > /dev/null; then
+  echo "Creating input group..."
+  sudo groupadd input
+fi
+
+# Add user to input group
+if ! groups $USER | grep -q "\binput\b"; then
+  echo "Adding $USER to input group..."
+  sudo gpasswd -a $USER input
+fi
+
+# Configure udev rules
+if [ ! -f /etc/udev/rules.d/99-input.rules ] || ! grep -q "uinput" /etc/udev/rules.d/99-input.rules; then
+    echo "Configuring udev rules in /etc/udev/rules.d/99-input.rules..."
+    echo 'KERNEL=="uinput", GROUP="input", MODE="0660"' | sudo tee /etc/udev/rules.d/99-input.rules
+    echo "Reloading udev rules..."
+    sudo udevadm control --reload-rules && sudo udevadm trigger
+fi
+
 if ! [ -x "$(which xremap)" ]; then
   echo "
   ERROR: This package depends on \"xremap\". 
   It must be installed in order to remap keys on startup.
   To install and set it up on Ubuntu use: 
 
-  sudo gpasswd -a $USER input
-  echo 'KERNEL=="uinput", GROUP="input", TAG+="uaccess"' | sudo tee /etc/udev/rules.d/input.rules
-  & cargo install xremap --features x11
+  cargo install xremap --features x11
   "
   exit 1
 fi
