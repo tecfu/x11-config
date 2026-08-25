@@ -16,6 +16,11 @@ if ! [ -x "$(which Xorg)" ]; then
   exit 0
 fi
 
+. "$(dirname "${BASH_SOURCE[0]}")/../lib/common.sh"
+
+# x11-config is DE-agnostic on X11: xremap/sxhkd work the same under XFCE and KDE.
+echo "INFO: detected desktop: $(detect_de) (x11-config is DE-agnostic on X11)"
+
 ### check for xremap & configure permissions
   
 echo "INFO: configuring udev rules for xremap..."
@@ -40,42 +45,20 @@ if [ ! -f /etc/udev/rules.d/99-input.rules ] || ! grep -q "uinput" /etc/udev/rul
     sudo udevadm control --reload-rules && sudo udevadm trigger
 fi
 
-if ! [ -x "$(which xremap)" ]; then
-  echo "
-  ERROR: This package depends on \"xremap\". 
-  It must be installed in order to remap keys on startup.
-  To install and set it up on Ubuntu use: 
+HAVE_XREM=1
+require_dep xremap "cargo install xremap --features x11" || HAVE_XREM=0
 
-  cargo install xremap --features x11
-  "
-  exit 1
-fi
-
-### Check for sxhkd
-if ! [ -x "$(which sxhkd)" ]; then
-  echo "
-  ERROR: This package depends on \"sxhkd\" (Simple X Hotkey Daemon). 
-  To install it on Ubuntu use: 
-
-  apt install sxhkd"
-  exit 1
-fi
-
-### Check for xdotool
-if ! [ -x "$(which xdotool)" ]; then
-  echo "
-  ERROR: This package depends on \"xdotool\". 
-  To install it on Ubuntu use:
-
-  apt install xdotool"
-  exit 1
-fi
+### Check for sxhkd / xdotool (both needed by sxhkdrc bindings)
+HAVE_SXHKD=1
+require_dep sxhkd "apt install sxhkd" || HAVE_SXHKD=0
+require_dep xdotool "apt install xdotool" || HAVE_SXHKD=0
 
 # declare array
 SYMLINKS=()
 SYMLINKS+=("$HOME/dotfiles/x11-config/.xprofile $HOME/.xprofile")
-SYMLINKS+=("$HOME/dotfiles/x11-config/xremap.yml $HOME/.config/xremap/xremap.yml")
-SYMLINKS+=("$HOME/dotfiles/x11-config/sxhkdrc $HOME/.config/sxhkd/sxhkdrc")
+# dep-gated configs: skipped when their dependency is missing and --ignore-missing-deps is set
+[ "$HAVE_XREM" = 1 ] && SYMLINKS+=("$HOME/dotfiles/x11-config/xremap.yml $HOME/.config/xremap/xremap.yml")
+[ "$HAVE_SXHKD" = 1 ] && SYMLINKS+=("$HOME/dotfiles/x11-config/sxhkdrc $HOME/.config/sxhkd/sxhkdrc")
 
 #printf '%s\n' "${SYMLINKS[@]}"
 #
