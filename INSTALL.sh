@@ -11,15 +11,19 @@
 #
 ###
 
-if ! [ -x "$(which Xorg)" ]; then
-  echo "INFO: X Window System not installed, skipping related config (keymappings)"
+. "$(dirname "${BASH_SOURCE[0]}")/../lib/common.sh"
+
+# Skip when the live session is not X11 (e.g. Wayland on KDE/GNOME).
+# Presence of the Xorg binary is NOT sufficient: many systems keep it
+# installed while actually running a Wayland session.
+SESSION="$(detect_session)"
+if [ "$SESSION" = "wayland" ] || { [ "$SESSION" = "unknown" ] && ! [ -x "$(which Xorg)" ]; }; then
+  install_skip "session type '$SESSION' is not X11; x11-config (xremap/sxhkd) does not apply."
   exit 0
 fi
 
-. "$(dirname "${BASH_SOURCE[0]}")/../lib/common.sh"
-
 # x11-config is DE-agnostic on X11: xremap/sxhkd work the same under XFCE and KDE.
-echo "INFO: detected desktop: $(detect_de) (x11-config is DE-agnostic on X11)"
+echo "INFO: detected desktop: $(detect_de), session: $SESSION (x11-config is DE-agnostic on X11)"
 
 ### check for xremap & configure permissions
   
