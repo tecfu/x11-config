@@ -50,12 +50,15 @@ if [ ! -f /etc/udev/rules.d/99-input.rules ] || ! grep -q "uinput" /etc/udev/rul
 fi
 
 HAVE_XREM=1
-require_dep xremap "cargo install xremap --features x11" || HAVE_XREM=0
+if ! command -v xremap >/dev/null 2>&1; then
+  apt_install cargo && export PATH="$HOME/.cargo/bin:$PATH" && cargo install xremap --features x11
+fi
+require_dep xremap || HAVE_XREM=0
 
 ### Check for sxhkd / xdotool (both needed by sxhkdrc bindings)
 HAVE_SXHKD=1
-require_dep sxhkd "apt install sxhkd" || HAVE_SXHKD=0
-require_dep xdotool "apt install xdotool" || HAVE_SXHKD=0
+require_dep sxhkd sxhkd || HAVE_SXHKD=0
+require_dep xdotool xdotool || HAVE_SXHKD=0
 
 # declare array
 SYMLINKS=()
