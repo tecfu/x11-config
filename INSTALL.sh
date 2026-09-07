@@ -13,12 +13,14 @@
 
 . "$(dirname "${BASH_SOURCE[0]}")/../lib/common.sh"
 
-# Skip when the live session is not X11 (e.g. Wayland on KDE/GNOME).
-# Presence of the Xorg binary is NOT sufficient: many systems keep it
-# installed while actually running a Wayland session.
+# Skip when the live session is not X11 (e.g. Wayland on KDE/GNOME), or when
+# no X server actually runs on this machine. xremap/sxhkd need local X: check
+# for real X sockets (/tmp/.X11-unix/X*) — the Xorg binary alone is NOT
+# evidence (servers often carry it unused), and DISPLAY over SSH forwarding
+# is not a local X session (xremap would be dead weight there).
 SESSION="$(detect_session)"
-if [ "$SESSION" = "wayland" ] || { [ "$SESSION" = "unknown" ] && ! [ -x "$(which Xorg)" ]; }; then
-  install_skip "session type '$SESSION' is not X11; x11-config (xremap/sxhkd) does not apply."
+if [ "$SESSION" = "wayland" ] || ! ls /tmp/.X11-unix/X* >/dev/null 2>&1; then
+  install_skip "session type '$SESSION', no local X server; x11-config (xremap/sxhkd) does not apply."
   exit 0
 fi
 
