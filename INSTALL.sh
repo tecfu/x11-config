@@ -37,10 +37,22 @@ if ! getent group input > /dev/null; then
   sudo groupadd input
 fi
 
+# When run via sudo, $HOME is root's and $USER is root — but xremap lives in
+# the invoking user's cargo bin, and the input group belongs to that user.
+# A plain non-login shell (ssh) also misses ~/.cargo/bin (never sourced from
+# ~/.profile), so put it on PATH unconditionally.
+TARGET_USER="${SUDO_USER:-$USER}"
+if [ "$(id -u)" = "0" ] && [ -n "${SUDO_USER:-}" ] && [ "$SUDO_USER" != "root" ]; then
+  USER_HOME="$(getent passwd "$TARGET_USER" | cut -d: -f6)"
+else
+  USER_HOME="$HOME"
+fi
+export PATH="$USER_HOME/.cargo/bin:$HOME/.cargo/bin:$PATH"
+
 # Add user to input group
-if ! groups $USER | grep -q "\binput\b"; then
-  echo "Adding $USER to input group..."
-  sudo gpasswd -a $USER input
+if ! groups "$TARGET_USER" | grep -q "\binput\b"; then
+  echo "Adding $TARGET_USER to input group..."
+  sudo gpasswd -a "$TARGET_USER" input
 fi
 
 # Configure udev rules
@@ -50,11 +62,6 @@ if [ ! -f /etc/udev/rules.d/99-input.rules ] || ! grep -q "uinput" /etc/udev/rul
     echo "Reloading udev rules..."
     sudo udevadm control --reload-rules && sudo udevadm trigger
 fi
-
-# cargo installs into ~/.cargo/bin, but a non-login shell (e.g. running
-# INSTALL.sh over plain ssh) never sources ~/.profile, so xremap can be
-# installed and running yet invisible to command -v. Put it on PATH first.
-export PATH="$HOME/.cargo/bin:$PATH"
 
 HAVE_XREM=1
 if ! command -v xremap >/dev/null 2>&1; then
