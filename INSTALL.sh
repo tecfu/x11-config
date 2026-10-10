@@ -51,9 +51,14 @@ if [ ! -f /etc/udev/rules.d/99-input.rules ] || ! grep -q "uinput" /etc/udev/rul
     sudo udevadm control --reload-rules && sudo udevadm trigger
 fi
 
+# cargo installs into ~/.cargo/bin, but a non-login shell (e.g. running
+# INSTALL.sh over plain ssh) never sources ~/.profile, so xremap can be
+# installed and running yet invisible to command -v. Put it on PATH first.
+export PATH="$HOME/.cargo/bin:$PATH"
+
 HAVE_XREM=1
 if ! command -v xremap >/dev/null 2>&1; then
-  apt_install cargo && export PATH="$HOME/.cargo/bin:$PATH" && cargo install xremap --features x11
+  apt_install cargo && cargo install xremap --features x11
 fi
 require_dep xremap || HAVE_XREM=0
 
