@@ -112,6 +112,33 @@ matters more than the laptop panel:
   with `font.size` ≈ 11, while VS Code would need a second instance with
   `--force-device-scale-factor=1` — it cannot do per-window DPI.
 
+**Restarting `xfsettingsd` by hand: give it the session's environment.**
+`xfsettingsd` also owns the keyboard shortcuts, and it spawns each bound command
+with *its own* `PATH`. An instance started from a root shell (or any context that
+did not inherit the desktop session) still grabs the keys, but every binding
+whose command lives outside the system path dies silently — no window, no error.
+Measured 2026-11-02: `Ctrl-Alt-T` → `alacritty` in `~/.cargo/bin` stopped working
+after a hand-restart, while bindings to system binaries kept firing.
+
+```sh
+# wrong: PATH comes from the caller
+setpriv --reuid="$(id -u)" --regid="$(id -g)" --init-groups \
+  env HOME="$HOME" DISPLAY="$DISPLAY" xfsettingsd
+
+# right: adopt a session-owned process's environment
+mapfile -d '' ENVV < "/proc/$(pgrep -u "$USER" xfce4-panel | head -1)/environ"
+setsid nohup env -i "${ENVV[@]}" xfsettingsd &
+```
+
+A fresh login also fixes it (the session starts it with the right environment).
+Either way the restarted daemon re-applies the saved display profile, which drops
+the output back to 1:1 — rerun `scale-external-monitor` afterwards.
+
+Diagnosing: `xrdb -query | grep Xft.dpi` proves the xsettings half is alive, and
+`xfconf-query -c xfce4-keyboard-shortcuts -p '/commands/custom/<Primary><Alt>t'`
+shows the binding. A binding that exists and whose grab works but opens nothing
+is a `PATH` problem inside the daemon, not a lost key grab.
+
 **Diagnosing a similar box.** `xrandr --query` prints each output's mode and
 physical size, so DPI = `width_px * 25.4 / width_mm`; `xrdb -query | grep Xft.dpi`
 shows what apps actually get; `xfconf-query -c xsettings -p /Xft/DPI` shows the
