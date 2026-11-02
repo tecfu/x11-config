@@ -46,23 +46,22 @@ Only one of them should be used at a time:
 
 ### Display scaling (mixed-DPI extended desktop)
 
-> Recorded 2026-11-02 on the ThinkPad T480 (XFCE 4.16.2, X11) after terminals and
-> VS Code became unusably large on the external monitor.
+> Recorded 2026-11-02 on an XFCE 4.16 / X11 laptop with an external monitor, after
+> terminals and VS Code became unusably large on the external screen.
 
 **The problem.** X11 has exactly **one** `Xft.dpi` for the whole screen, and XFCE
 stores it as `/Xft/DPI` in the `xsettings` channel (Settings → Appearance →
-Fonts → Custom DPI). This box sets **144**, which suits the laptop panel but not
-the external one:
+Fonts → Custom DPI). The session where this was measured sets **144**, which
+suits the laptop panel but not the external one:
 
 | Output | Mode | Physical size | Real DPI | What 144 gives |
 |---|---|---|---|---|
 | `eDP-1` laptop panel | 1920×1080 | 309×173 mm | **158** | 0.91× — correct, this is what 144 was tuned for |
-| `HDMI-2` Acer 27" | 1920×1080 | 598×336 mm | **82** | **1.76× too large** |
+| `HDMI-2` external | 1920×1080 | 598×336 mm | **82** | **1.76× too large** |
 
 So on the external a maximized editor behaves like a ~900×500 window: the extra
 screen buys no extra content. (VS Code compounded it with
-`"window.zoomLevel": 1.0`, i.e. another 1.2× — `window.zoomLevel` has lived in the
-separate `vscode-config` repo since, and is now `0`.)
+`"window.zoomLevel": 1.0`, another 1.2× on top, so the editor behaved like ~2.1×.)
 
 **The fix.** X11 cannot give two outputs two DPIs, so the external output is
 scaled *geometrically* instead — it presents a 2880×1620 desktop into its
@@ -102,16 +101,15 @@ hotplug, so the hook sleeps 5 s and applies the scale after that, and:
 
 **Tradeoffs.** The external's pixels are rendered at 1.5× and downsampled by the
 display engine, so text is slightly soft (grayscale-AA look) and video on that
-output goes through an extra scale step; the composite is 4800×1620, fine for
-the UHD 620 here in 2D. The worthwhile alternative, if crispness matters more
-than the laptop panel:
+output goes through an extra scale step; the composite is 4800×1620, which is
+fine for integrated graphics in 2D. The worthwhile alternative, if crispness
+matters more than the laptop panel:
 
 - Set Custom DPI to **96** (Settings → Appearance → Fonts) and revert the scale:
   external becomes exactly 1:1, but the laptop panel drops to ~0.61× (19 of 30
   GTK dialogs become small).
 - Or keep 144 and override per app: Alacritty honours `WINIT_X11_SCALE_FACTOR=1`
-  with `font.size` ≈ 11 (see `~/.config/alacritty/{laptop,external}.toml`), while
-  VS Code would need a second instance with
+  with `font.size` ≈ 11, while VS Code would need a second instance with
   `--force-device-scale-factor=1` — it cannot do per-window DPI.
 
 **Diagnosing a similar box.** `xrandr --query` prints each output's mode and

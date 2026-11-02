@@ -3,8 +3,8 @@
 #
 # Why: this desktop has ONE global Xft.dpi (144, set in XFCE Settings ->
 # Appearance -> Fonts, stored as /Xft/DPI in the xsettings channel). That value
-# is right for the laptop panel (1920x1080 over 309mm = 158 dpi), but the Acer
-# 27" external is 1920x1080 over 598mm = 82 dpi, so every UI renders there about
+# is right for the laptop panel (1920x1080 over 309mm = 158 dpi), but a 27"
+# 1920x1080 external is 598mm across = 82 dpi, so every UI renders there about
 # 1.8x too large: a maximized editor behaves like a ~900x500 window.
 #
 # X11 cannot give two outputs two DPIs, so this scales the external output
