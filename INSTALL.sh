@@ -77,6 +77,9 @@ require_dep xdotool xdotool || HAVE_SXHKD=0
 # declare array
 SYMLINKS=()
 SYMLINKS+=("$HOME/dotfiles/x11-config/.xprofile $HOME/.xprofile")
+# Mixed-DPI extended desktop: denser desktop on the low-DPI external output.
+# Harmless when only the laptop panel is connected (the script no-ops).
+SYMLINKS+=("$HOME/dotfiles/x11-config/scale-external-monitor $HOME/.local/bin/scale-external-monitor")
 # dep-gated configs: skipped when their dependency is missing and --ignore-missing-deps is set
 [ "$HAVE_XREM" = 1 ] && SYMLINKS+=("$HOME/dotfiles/x11-config/xremap.yml $HOME/.config/xremap/xremap.yml")
 [ "$HAVE_SXHKD" = 1 ] && SYMLINKS+=("$HOME/dotfiles/x11-config/sxhkdrc $HOME/.config/sxhkd/sxhkdrc")
@@ -102,3 +105,26 @@ for i in "${SYMLINKS[@]}"; do
     ln -s $i
   fi
 done
+
+### Mixed-DPI extended desktop: autostart entry for scale-external-monitor
+# The desktop entry needs the real $HOME inside Exec, and desktop-entry quoting
+# cannot carry a variable there (desktop-file-validate rejects '$' inside a
+# quoted Exec argument), so generate it rather than symlink it - the same
+# approach keyboard-shortcuts/install.sh uses for sxhkd-dotfiles.desktop.
+AUTOSTART="$HOME/.config/autostart/external-monitor-scale.desktop"
+mkdir -p "$(dirname "$AUTOSTART")"
+if ! grep -qxF "Exec=$HOME/.local/bin/scale-external-monitor" "$AUTOSTART" 2>/dev/null; then
+  cat > "$AUTOSTART" <<EOF2
+[Desktop Entry]
+Type=Application
+Name=External monitor scale
+Comment=Denser desktop on the low-DPI external output (see x11-config/README.md)
+Exec=$HOME/.local/bin/scale-external-monitor
+Terminal=false
+NoDisplay=true
+X-GNOME-Autostart-enabled=true
+EOF2
+  echo "WRITE: $AUTOSTART"
+else
+  echo "OK: $AUTOSTART (already present)"
+fi

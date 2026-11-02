@@ -1,0 +1,69 @@
+#!/bin/sh
+# Give the low-DPI external monitor a denser desktop.
+#
+# Why: this desktop has ONE global Xft.dpi (144, set in XFCE Settings ->
+# Appearance -> Fonts, stored as /Xft/DPI in the xsettings channel). That value
+# is right for the laptop panel (1920x1080 over 309mm = 158 dpi), but the Acer
+# 27" external is 1920x1080 over 598mm = 82 dpi, so every UI renders there about
+# 1.8x too large: a maximized editor behaves like a ~900x500 window.
+#
+# X11 cannot give two outputs two DPIs, so this scales the external output
+# geometrically instead: it presents a 2880x1620 desktop into its 1920x1080
+# panel, which lands UI text at about 96 dpi there. The laptop panel is left
+# exactly as it was.
+#
+#   scale-external-monitor            apply (run by autostart at login)
+#   scale-external-monitor --status   show the output's current geometry
+#   scale-external-monitor --revert   back to 1:1
+#
+# Env: EXTERNAL_OUTPUT (HDMI-2), EXTERNAL_SCALE (1.5), EXTERNAL_SCALE_DELAY (5)
+#
+# The delay lets xfsettingsd apply its saved display profile first. xfsettingsd
+# re-applies that profile on login and on monitor hotplug, which drops the scale
+# back to 1:1 - rerun this script after a hotplug.
+#
+# Tradeoff: the external's pixels are rendered at 1.5x and downsampled by the
+# display engine, so text is slightly soft. EXTERNAL_SCALE=1.75 matches the real
+# DPI ratio (144/82 = 1.76) at the cost of more GPU and a further downsample.
+# See README.md ("Display scaling") for the crisp alternative.
+set -u
+
+OUT="${EXTERNAL_OUTPUT:-HDMI-2}"
+SCALE="${EXTERNAL_SCALE:-1.5}"
+DELAY="${EXTERNAL_SCALE_DELAY:-5}"
+
+usage() {
+  echo "usage: $(basename "$0") [--status|--revert|--help]"
+  echo
+  echo "  (no args)  apply ${SCALE}x scale to $OUT after ${DELAY}s"
+  echo "  --status   show $OUT's current geometry"
+  echo "  --revert   reset $OUT to 1:1"
+  echo
+  echo "  env: EXTERNAL_OUTPUT EXTERNAL_SCALE EXTERNAL_SCALE_DELAY"
+}
+
+case "${1:-}" in
+  --status)
+    exec xrandr --query | grep "^${OUT} connected"
+    ;;
+  --revert)
+    exec xrandr --output "$OUT" --scale 1x1
+    ;;
+  -h|--help)
+    usage
+    exit 0
+    ;;
+  "")
+    ;;
+  *)
+    usage >&2
+    exit 2
+    ;;
+esac
+
+sleep "$DELAY"
+
+# Unplugged monitor: nothing to do, and xrandr would fail noisily.
+xrandr --query | grep -q "^${OUT} connected" || exit 0
+
+exec xrandr --output "$OUT" --scale "${SCALE}x${SCALE}"
